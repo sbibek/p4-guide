@@ -152,7 +152,7 @@ set -x
 # safest number that enables compiling p4c even on machines with only
 # 2 GB of RAM, and even on machines with significantly more RAM, it
 # does not speed things up a lot to run multiple jobs in parallel.
-MAX_PARALLEL_JOBS=1
+MAX_PARALLEL_JOBS=`grep -c ^processor /proc/cpuinfo`
 
 set +x
 echo "This script builds and installs the P4_16 (and also P4_14)"
@@ -343,7 +343,7 @@ cd protobuf
 git checkout v3.6.1
 ./autogen.sh
 ./configure
-make
+make -j${MAX_PARALLEL_JOBS}
 sudo make install
 sudo ldconfig
 # Save about 0.5G of storage by cleaning up protobuf build
@@ -382,7 +382,7 @@ then
         patch -p1 < "${PATCH_FILE}"
     done
 fi
-make
+make -j${MAX_PARALLEL_JOBS}
 sudo make install
 sudo ldconfig
 # Save about 0.3G of storage by cleaning up grpc v1.17.2 build
@@ -423,7 +423,7 @@ git log -n 1
 #Compile p4runtime.proto and associated fe .... : yes
 #Compile internal RPC ......................... : no
 #Compile PI C CLI ............................. : no
-make
+make -j${MAX_PARALLEL_JOBS}
 sudo make install
 
 # Save about 0.25G of storage by cleaning up PI build
@@ -456,7 +456,7 @@ date
 # needed for experimental gNMI support.  That should all have been
 # done by this time, by the script above.
 
-get_from_nearest https://github.com/p4lang/behavioral-model.git behavioral-model.tar.gz
+get_from_nearest https://github.com/sbibek/behavioral-model.git behavioral-model.tar.gz
 cd behavioral-model
 # Get latest updates that are not in the repo cache version
 git pull
@@ -471,7 +471,7 @@ patch -p1 < "${PATCH_DIR}/behavioral-model-use-thrift-0.12.0.patch" || echo "Err
 ./autogen.sh
 # Remove 'CXXFLAGS ...' part to disable debug
 ./configure --with-pi 'CXXFLAGS=-O0 -g'
-make
+make -j${MAX_PARALLEL_JOBS}
 sudo make install
 # Now build simple_switch_grpc
 cd targets/simple_switch_grpc
@@ -482,7 +482,7 @@ cd targets/simple_switch_grpc
 #Features recap ......................
 #With Sysrepo .................. : no
 #With Thrift ................... : yes
-make
+make -j${MAX_PARALLEL_JOBS}
 sudo make install
 sudo ldconfig
 
